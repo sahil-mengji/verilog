@@ -21,51 +21,25 @@ module Medicine_Reminder_tb;
 
     // Test stimulus
     initial begin
-        // Initialize signals
-        reset = 1; // Assert reset
-        #10; // Wait for a few cycles
-        reset = 0; // Deassert reset
-
-        // Run the test
+        reset = 1;
+        #10 reset = 0;
         test_medicine_reminder();
-
-        // Finish simulation
         $finish;
     end
 
     // Medicine Reminder test task
     task test_medicine_reminder;
-        integer i;
-        reg [31:0] on_time;
-        reg [31:0] last_reminder_time;
-        reg [31:0] check_time;
-
+        integer cycle_count;
         begin
             $display("\nMedicine Reminder Test Cases");
             $display("+-------+-------------------+-----------------+");
-            $display("| Case  | Time              | Medicine Reminder |");
+            $display("| Cycle | Time              | Medicine Reminder |");
             $display("+-------+-------------------+-----------------+");
 
-            last_reminder_time = 0; // Initialize the last reminder time
-
-            for (check_time = 0; check_time <= 10000; check_time = check_time + 5) begin
-                #5; // Wait for the next 5 ns
-
-                // Check if the medicine reminder is currently active
-                if (medicine_reminder) begin
-                    // Calculate how long it has been on since the last reminder
-                    on_time = $time - last_reminder_time;
-
-                    // Update last_reminder_time if it was just activated
-                    if (last_reminder_time == 0 || last_reminder_time == $time - 1000) begin
-                        last_reminder_time = $time;
-                    end
-                end else begin
-                    on_time = 0;
-                end
-
-                // Display the current case results every 5 ns
-                $display("| %3d   | %10dns | %17b |", check_time / 5, $time, medicine_reminder);
+            for (cycle_count = 0; cycle_count <= 2100; cycle_count = cycle_count + 1) begin
+                @(posedge clk); // Synchronize with positive clock edge
+                #1; // Small delay to allow for signal propagation
+                $display("| %5d | %10d ns | %17b |", cycle_count, $time, medicine_reminder);
             end
 
             $display("+-------+-------------------+-----------------+");
@@ -74,7 +48,7 @@ module Medicine_Reminder_tb;
 
     // Monitor outputs
     initial begin
-        $monitor("Time: %0dns | Medicine Reminder: %b", $time, medicine_reminder);
+        $monitor("Time: %0d ns | Medicine Reminder: %b", $time, medicine_reminder);
     end
 
 endmodule
